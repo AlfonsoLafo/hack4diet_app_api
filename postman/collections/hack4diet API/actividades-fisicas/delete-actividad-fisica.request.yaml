@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'delete actividad fisica'
+method: DELETE
+url: '{{baseUrl}}/api/actividades-fisicas/{{resourceId}}'
+order: 5000

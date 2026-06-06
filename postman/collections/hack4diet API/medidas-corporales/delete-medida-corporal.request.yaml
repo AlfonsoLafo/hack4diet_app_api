@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'delete medida corporal'
+method: DELETE
+url: '{{baseUrl}}/api/medidas-corporales/{{resourceId}}'
+order: 5000

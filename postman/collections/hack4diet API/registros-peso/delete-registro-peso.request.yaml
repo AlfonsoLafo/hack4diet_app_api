@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'delete registro peso'
+method: DELETE
+url: '{{baseUrl}}/api/registros-peso/{{resourceId}}'
+order: 5000

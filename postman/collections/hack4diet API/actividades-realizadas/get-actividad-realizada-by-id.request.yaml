@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get actividad realizada by id'
+method: GET
+url: '{{baseUrl}}/api/actividades-realizadas/{{resourceId}}'
+order: 1000

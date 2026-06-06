@@ -1,0 +1,17 @@
+$kind: http-request
+name: 'create actividad realizada'
+method: POST
+url: '{{baseUrl}}/api/actividades-realizadas'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idUsuario": "{{userId}}",
+      "idActividadFisica": "{{resourceId}}",
+      "duracionMinutos": 45,
+      "fecha": "2026-01-01"
+    }

@@ -1,0 +1,22 @@
+$kind: collection
+name: hack4diet API
+variables:
+  baseUrl: http://localhost:3000
+  token: ""
+  userId: 64b000000000000000000001
+  resourceId: 64b000000000000000000002
+  email: user@example.com
+  barcode: "8410076474894"
+auth:
+  - id: 457207bf-c63d-4974-b413-2d50cdf9dc86
+    type: jwt
+    name: JWT Bearer
+    credentials:
+      algorithm: HS256
+      isSecretBase64Encoded: false
+      payload: '{"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2YTIzZTI5YzQ1MWE3ZDUwNzU1YjIxMjciLCJpYXQiOjE3ODA3MzcyMTAsImV4cCI6MTgxMjI5NDgxMH0.DGV7M53wkvCY2gpXBltI6AsWw53PFUsMNWFgGADavio"}'
+      addTokenTo: header
+      headerPrefix: Bearer
+      queryParamKey: token
+      header: "{}"
+      secret: de7a46a2b532f28c086ac03b3edcf9b675b14070568a43ab040316dcdf3d56c6

@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get registros peso by usuario'
+method: GET
+url: '{{baseUrl}}/api/registros-peso/usuario/{{userId}}'
+order: 2000

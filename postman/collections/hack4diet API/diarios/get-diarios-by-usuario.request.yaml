@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get diarios by usuario'
+method: GET
+url: '{{baseUrl}}/api/diarios/usuario/{{userId}}'
+order: 2000

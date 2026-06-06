@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'update registro peso'
+method: PUT
+url: '{{baseUrl}}/api/registros-peso/{{resourceId}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "peso": 77.8
+    }

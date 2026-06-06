@@ -1,0 +1,15 @@
+$kind: http-request
+name: 'create modelo3d'
+method: POST
+url: '{{baseUrl}}/api/modelos3D'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idUsuario": "{{userId}}",
+      "url": "https://example.com/model.glb"
+    }

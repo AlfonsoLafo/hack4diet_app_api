@@ -1,0 +1,19 @@
+$kind: http-request
+name: 'update alimentos consumidos'
+method: PUT
+url: '{{baseUrl}}/api/diarios/alimentos-consumidos/{{resourceId}}'
+order: 5000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "alimentosConsumidos": [
+        {
+          "idAlimento": "{{resourceId}}",
+          "cantidad": 1
+        }
+      ]
+    }

@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get usuario by id'
+method: GET
+url: '{{baseUrl}}/api/usuarios/{{userId}}'
+order: 1000

@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get alimento by id'
+method: GET
+url: '{{baseUrl}}/api/alimentos/{{resourceId}}'
+order: 1000

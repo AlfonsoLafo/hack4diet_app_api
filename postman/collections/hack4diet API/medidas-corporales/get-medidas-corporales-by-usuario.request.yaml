@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get medidas corporales by usuario'
+method: GET
+url: '{{baseUrl}}/api/medidas-corporales/usuario/{{userId}}'
+order: 2000

@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get uploaded file'
+method: GET
+url: '{{baseUrl}}/api/uploads/{{resourceId}}'
+order: 1000

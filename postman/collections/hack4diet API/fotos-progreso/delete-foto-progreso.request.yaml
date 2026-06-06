@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'delete foto progreso'
+method: DELETE
+url: '{{baseUrl}}/api/fotos-progreso/{{resourceId}}'
+order: 4000

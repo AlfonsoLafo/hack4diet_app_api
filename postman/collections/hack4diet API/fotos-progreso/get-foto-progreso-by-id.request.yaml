@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get foto progreso by id'
+method: GET
+url: '{{baseUrl}}/api/fotos-progreso/{{resourceId}}'
+order: 1000

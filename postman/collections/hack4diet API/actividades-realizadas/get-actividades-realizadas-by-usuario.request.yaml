@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get actividades realizadas by usuario'
+method: GET
+url: '{{baseUrl}}/api/actividades-realizadas/usuario/{{userId}}'
+order: 2000

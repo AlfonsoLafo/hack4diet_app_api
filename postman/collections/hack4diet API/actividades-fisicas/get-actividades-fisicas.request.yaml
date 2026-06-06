@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get actividades fisicas'
+method: GET
+url: '{{baseUrl}}/api/actividades-fisicas'
+order: 2000

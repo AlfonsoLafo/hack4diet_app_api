@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'delete alimento'
+method: DELETE
+url: '{{baseUrl}}/api/alimentos/{{resourceId}}'
+order: 5000

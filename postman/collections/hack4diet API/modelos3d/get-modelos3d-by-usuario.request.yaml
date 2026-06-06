@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get modelos3d by usuario'
+method: GET
+url: '{{baseUrl}}/api/modelos3D/usuario/{{userId}}'
+order: 2000

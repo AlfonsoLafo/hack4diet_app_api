@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'update medida corporal'
+method: PUT
+url: '{{baseUrl}}/api/medidas-corporales/{{resourceId}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "cintura": 81
+    }

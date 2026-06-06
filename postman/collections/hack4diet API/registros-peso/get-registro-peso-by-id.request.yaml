@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get registro peso by id'
+method: GET
+url: '{{baseUrl}}/api/registros-peso/{{resourceId}}'
+order: 1000

@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'delete modelo3d'
+method: DELETE
+url: '{{baseUrl}}/api/modelos3D/{{resourceId}}'
+order: 4000

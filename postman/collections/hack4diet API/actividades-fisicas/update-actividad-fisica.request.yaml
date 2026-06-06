@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'update actividad fisica'
+method: PUT
+url: '{{baseUrl}}/api/actividades-fisicas/{{resourceId}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "caloriasPorHora": 650
+    }

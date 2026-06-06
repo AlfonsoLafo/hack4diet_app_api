@@ -1,0 +1,14 @@
+$kind: http-request
+name: 'update diario'
+method: PUT
+url: '{{baseUrl}}/api/diarios/{{resourceId}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fecha": "2026-01-02"
+    }

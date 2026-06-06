@@ -1,0 +1,22 @@
+$kind: http-request
+name: create alimento
+method: POST
+url: "{{baseUrl}}/api/alimentos"
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: ""
+    value: ""
+    disabled: true
+body:
+  type: json
+  content: |-
+    {
+      "idUsuario": "{{userId}}",
+      "nombre": "Manzana",
+      "calorias": 52,
+      "proteinas": 0.3,
+      "carbohidratos": 14,
+      "grasas": 0.2
+    }

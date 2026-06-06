@@ -19,10 +19,10 @@
     "express": "^4.18.2",
     "express-fileupload": "^1.4.3",
     "express-validator": "^7.0.1",
-    "firebase-admin": "^12.0.0",
+    "firebase-admin": "^13.10.0",
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3",
-    "uuid": "^9.0.1"
+    "uuid": "^14.0.0"
   }
 }

@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'get medida corporal by id'
+method: GET
+url: '{{baseUrl}}/api/medidas-corporales/{{resourceId}}'
+order: 1000

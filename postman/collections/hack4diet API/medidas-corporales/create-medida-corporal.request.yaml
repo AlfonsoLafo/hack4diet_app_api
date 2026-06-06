@@ -1,0 +1,18 @@
+$kind: http-request
+name: 'create medida corporal'
+method: POST
+url: '{{baseUrl}}/api/medidas-corporales'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idUsuario": "{{userId}}",
+      "cintura": 80,
+      "pecho": 95,
+      "cadera": 90,
+      "fecha": "2026-01-01"
+    }

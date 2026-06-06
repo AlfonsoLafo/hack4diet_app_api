@@ -1,0 +1,16 @@
+$kind: http-request
+name: 'create registro peso'
+method: POST
+url: '{{baseUrl}}/api/registros-peso'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "idUsuario": "{{userId}}",
+      "peso": 78.5,
+      "fecha": "2026-01-01"
+    }

@@ -1,0 +1,8 @@
+$kind: http-request
+name: 'renovar token'
+method: GET
+url: '{{baseUrl}}/api/login/token'
+order: 2000
+headers:
+  - key: x-token
+    value: '{{token}}'

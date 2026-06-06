@@ -1,0 +1,5 @@
+$kind: http-request
+name: 'delete diario'
+method: DELETE
+url: '{{baseUrl}}/api/diarios/{{resourceId}}'
+order: 6000
