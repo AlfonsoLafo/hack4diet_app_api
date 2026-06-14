@@ -80,6 +80,66 @@ const UsuarioSchema = Schema(
                 type: String,
                 default: 'CLARO'
             }
+        },
+        puntos: {
+            type: Number,
+            default: 0
+        },
+        rachaActual: {
+            type: Number,
+            default: 0
+        },
+        maximaRacha: {
+            type: Number,
+            default: 0
+        },
+        insigniasDesbloqueadas: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Insignia'
+        }],
+        insigniasDestacada: {
+            type: Schema.Types.ObjectId,
+            ref: 'Insignia'
+        },
+        avatar: {
+            type: Schema.Types.ObjectId,
+            ref: 'Avatar'
+        },
+        codigoAmigo: {
+            type: String,
+            required: true,
+            unique: true
+        },
+        amigos: [{
+            type: Schema.Types.ObjectId, 
+            ref: 'Usuario'
+        }],
+        solicitudesAmistad: [{ 
+            type: Schema.Types.ObjectId, 
+            ref: 'Usuario' 
+        }],
+        misionesCompletadas: [{
+            type: Schema.Types.ObjectId, 
+            ref: 'Mision'
+        }],
+        recetasGuardadas: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Receta'
+        }],
+        opcionesPrivacidad: {
+            type: {
+                currentStreak:  { type: Boolean, default: true },
+                maximumStreak:  { type: Boolean, default: true },
+                points:         { type: Boolean, default: true },
+                badges:         { type: Boolean, default: true }
+            },
+            default: {
+                currentStreak: true,
+                maximumStreak: true,
+                level: true,
+                points: true,
+                badges: true
+            }
         }
     }, { collection: 'usuarios' }
 );

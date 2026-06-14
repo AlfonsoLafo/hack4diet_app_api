@@ -12,7 +12,8 @@ const {
     createUser, 
     updateUser,
     updatePassword,
-    deleteUser
+    deleteUser,
+    getPerfilPublicoPorCodigo
 } = require('../controllers/usuarios.controller');
 
 const router= Router();
@@ -28,6 +29,11 @@ router.get('/email/:email', [
     check('email','El email es incorrecto').isEmail(),
     validarCampos,
 ], getUserByEmail);
+
+router.get('/amigos/:codigo', [
+    check('codigo', 'El código de amigo es obligatorio').not().isEmpty(),
+    validarCampos
+], getPerfilPublicoPorCodigo);
 
 router.post('/',[
     // validarJWT,

@@ -3,6 +3,7 @@ const RegistroPeso = require('../models/registro-peso.model');
 const Alimento = require('../models/alimento.model');
 const Diario = require('../models/diario.model');
 const MedidaCorporal = require('../models/medida-corporal.model');
+const Avatar  = require('../models/avatar.model');
 const ActividadFisica = require('../models/actividad-fisica.model');
 const ActividadRealizada = require('../models/actividad-realizada.model');
 const { response  }= require('express');
@@ -11,6 +12,7 @@ const { createMedidasCorporalesDefault } = require('./medidas-corporales.control
 const { SexoEnum } = require("../enums/sexo.enum");
 const { PlanEnum } = require("../enums/plan.enum");
 const { NivelActividadEnum } = require("../enums/nivel-actividad.enum");
+const crypto = require('crypto');
 
 const getUserById = async(req, res = response) => {
     const uid = req.params.id;
@@ -77,6 +79,49 @@ const getUserByEmail = async(req, res = response) => {
     }
 }
 
+const getPerfilPublicoPorCodigo = async (req, res = response) => {
+    const codigo = req.params.codigo;
+
+    try {
+        // Buscamos al usuario por su código trayendo todos los campos potenciales
+        const usuario = await Usuario.findOne({ codigoAmigo: codigo});
+        if (!usuario) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No se encontró ningún usuario con ese código'
+            });
+        }
+
+        // Extraemos las opciones de privacidad configuradas por el usuario
+        const { currentStreak, maximumStreak, nivel, points, insignias } = usuario.opcionesPrivacidad;
+
+        console.log(usuario);
+        const perfilPublico = {
+            nombre: usuario.nombre,
+            friendCode: usuario.friendCode,
+            insigniaDestacada: usuario.insigniaDestacada
+        };
+
+        // Filtramos dinámicamente según sus preferencias
+        if (usuario.opcionesPrivacidad.currentStreak) perfilPublico.rachaActual            = usuario.rachaActual;
+        if (usuario.opcionesPrivacidad.maximumStreak) perfilPublico.maximaRacha            = usuario.maximaRacha;
+        if (usuario.opcionesPrivacidad.points)        perfilPublico.puntos                 = usuario.puntos;
+        if (usuario.opcionesPrivacidad.badges)        perfilPublico.insigniasDesbloqueadas = usuario.insigniasDesbloqueadas; // Aquí irían sus insignias vinculadas
+
+        res.json({
+            ok: true,
+            usuario: perfilPublico
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al procesar la solicitud del perfil público'
+        });
+    }
+};
+
 const createUser = async(req, res = response) => {
 
     console.log('Creando usuario');
@@ -109,7 +154,16 @@ const createUser = async(req, res = response) => {
         usuario.pesoHistorico.pesoMaximo = usuario.pesoInicial;
         usuario.pesoHistorico.pesoMinimo = usuario.pesoInicial;
         usuario.pesoActual = usuario.pesoInicial;
+        
+        const avatares = await Avatar.find();
+        console.log(avatares);
+        usuario.avatar = avatares[0]._id
 
+        // Creamos un código de amigo
+        const hash = crypto.createHash('sha256').update(usuario.email).digest('hex');
+        const chunk = hash.slice(0, 8).toUpperCase();
+        usuario.codigoAmigo = chunk;
+        
         await usuario.save();
 
         // Añadimos un primer registro de peso para el usuario 
@@ -347,4 +401,5 @@ module.exports = {
     updateUser,
     updatePassword,
     deleteUser,
+    getPerfilPublicoPorCodigo
 }

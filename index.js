@@ -25,19 +25,21 @@ app.use(fileUpload ({
 app.use(bodyParser.json());
 
 // Rutas
-app.use('/api/login', require('./routes/auth.router'));
-app.use('/api/usuarios', require('./routes/usuarios.router'));
-app.use('/api/alimentos', require('./routes/alimentos.router'));
-app.use('/api/registros-peso', require('./routes/registros-peso.router'));
-app.use('/api/diarios', require('./routes/diarios.router'));
-app.use('/api/medidas-corporales', require('./routes/medidas-corporales.router'));
-app.use('/api/actividades-fisicas', require('./routes/actividades-fisicas.router'));
-app.use('/api/actividades-realizadas', require('./routes/actividades-realizadas.router'));
-app.use('/api/modelos3D', require('./routes/modelos3D.router'));
-app.use('/api/fotos-progreso', require('./routes/fotos-progreso.router'));
-app.use('/api/uploads', require('./routes/uploads.router'));
+app.use('/api/login',                   require('./routes/auth.router'));
+app.use('/api/usuarios',                require('./routes/usuarios.router'));
+app.use('/api/alimentos',               require('./routes/alimentos.router'));
+app.use('/api/registros-peso',          require('./routes/registros-peso.router'));
+app.use('/api/diarios',                 require('./routes/diarios.router'));
+app.use('/api/medidas-corporales',      require('./routes/medidas-corporales.router'));
+app.use('/api/actividades-fisicas',     require('./routes/actividades-fisicas.router'));
+app.use('/api/actividades-realizadas',  require('./routes/actividades-realizadas.router'));
+app.use('/api/modelos3D',               require('./routes/modelos3D.router'));
+app.use('/api/fotos-progreso',          require('./routes/fotos-progreso.router'));
+app.use('/api/uploads',                 require('./routes/uploads.router'));
+app.use('/api/avatares',                require('./routes/avatar.router'));
+app.use('/api/insignias',               require('./routes/insignia.router'));
 
-app.use('/api/open-food-facts', require('./external-services/open-food-facts.service'));
+app.use('/api/open-food-facts',         require('./external-services/open-food-facts.service'));
 
 app.listen(process.env.PORT, ()=>{
   console.log('Servidor en puerto: ' + process.env.PORT);

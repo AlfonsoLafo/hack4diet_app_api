@@ -1,8 +1,7 @@
 $kind: http-request
-name: get usuario by email
-method: GET
 url: "{{baseUrl}}/api/usuarios/email/{{email}}"
+method: GET
 body:
   type: json
   content: ""
-order: 2000
+order: 2229

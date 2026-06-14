@@ -2,4 +2,4 @@ $kind: http-request
 name: 'delete usuario'
 method: DELETE
 url: '{{baseUrl}}/api/usuarios/{{userId}}'
-order: 6000
+order: 7000

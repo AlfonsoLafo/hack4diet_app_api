@@ -1,0 +1,59 @@
+const { Schema, model } = require('mongoose');
+
+const MisionSchema = new mongoose.Schema({
+    idMision: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'ListaMisiones', 
+        required: true 
+    },
+    idUsuario: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'Usuario', 
+        required: true
+    },
+    fecha: { 
+        type: Date, 
+        required: true 
+    },
+    estado: { 
+        type: String, 
+        enum: ['pendiente', 'completada', 'fallida'], 
+        default: 'pendiente' 
+    },
+    puntosOtorgados: { 
+        type: Number, 
+        default: 0 
+    }
+    }, { collection: 'mision' }
+);
+
+const ListaMisionesSchema = new mongoose.Schema({
+    descripcion: {
+        type: String,
+        required: true
+    },
+    puntosMin: {
+        type: Number,
+        required: true
+    },
+    puntosMax: {
+        type: Number,
+        required: true
+    }
+});
+
+MisionSchema.method('toJSON', function(){
+    const { __v, _id, ...object } = this.toObject();
+    
+    object.uid = _id;
+    return object;
+});
+ListaMisionesSchema.method('toJSON', function(){
+    const { __v, _id, ...object } = this.toObject();
+    
+    object.uid = _id;
+    return object;
+});
+
+module.exports = model('Mision', MisionSchema);
+module.exports = model('ListaMisiones', ListaMisionesSchema);

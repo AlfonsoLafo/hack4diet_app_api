@@ -1,0 +1,8 @@
+$kind: http-request
+name: get usuario by friend code
+method: GET
+url: "{{baseUrl}}/api/usuarios/amigos/{{codigo}}"
+body:
+  type: json
+  content: ""
+order: 3000

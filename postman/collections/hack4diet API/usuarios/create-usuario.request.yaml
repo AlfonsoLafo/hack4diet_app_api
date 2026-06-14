@@ -2,20 +2,20 @@ $kind: http-request
 name: create usuario
 method: POST
 url: "{{baseUrl}}/api/usuarios"
-order: 3000
+order: 4000
 headers:
   Content-Type: application/json
 body:
   type: json
   content: |-
     {
-      "nombre": "demo",
-      "email": "demo@demo.com",
+      "nombre": "demo2",
+      "email": "demo2@demo.com",
       "password": "demo",
       "edad": 20,
       "sexo": "HOMBRE",
-      "altura": "141",
-      "pesoInicial": "141",
+      "altura": "121",
+      "pesoInicial": "121",
       "plan": {
         "tipo": "Perder peso",
         "nivelActividad": "Sedentario"
