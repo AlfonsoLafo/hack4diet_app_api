@@ -1,5 +1,7 @@
 $kind: http-request
-name: 'delete usuario'
+name: delete usuario
 method: DELETE
-url: '{{baseUrl}}/api/usuarios/{{userId}}'
+url: "{{baseUrl}}/api/usuarios/{{userId}}"
+headers:
+  x-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2YTJlYzVmY2E3MWNiZmE3OThjMjRhZmIiLCJpYXQiOjE3ODE0NTA1NjksImV4cCI6MTgxMzAwODE2OX0.C4VVHP9gzRgWMhAVnZiWQV4mstflqAd-qCWdRAUqhFE
 order: 7000

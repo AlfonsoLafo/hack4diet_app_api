@@ -1,5 +1,7 @@
 $kind: http-request
-name: 'get usuario by id'
+name: get usuario by id
 method: GET
-url: '{{baseUrl}}/api/usuarios/{{userId}}'
+url: "{{baseUrl}}/api/usuarios/{{userId}}"
+headers:
+  x-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2YTJlYzVmY2E3MWNiZmE3OThjMjRhZmIiLCJpYXQiOjE3ODE0NTAyNDUsImV4cCI6MTgxMzAwNzg0NX0.x23KWeu99GQiS2j3mMN4LPVtJYIxCYl5R7z7UkhCxTM
 order: 1000

@@ -9,11 +9,15 @@ const { validarNivelActividad } = require('../middleware/validar-nivel-actividad
 const {
     getUserById,
     getUserByEmail,
-    createUser, 
+    getLeaderboard,
+    getPerfilPublicoPorCodigo,
+    enviarSolicitudAmistad,
+    responderSolicitudAmistad,
+    createUser,
     updateUser,
     updatePassword,
     deleteUser,
-    getPerfilPublicoPorCodigo
+    deleteAmigo,
 } = require('../controllers/usuarios.controller');
 
 const router= Router();
@@ -30,10 +34,18 @@ router.get('/email/:email', [
     validarCampos,
 ], getUserByEmail);
 
+router.get('/amigos/', [
+    validarJWT,
+    check('codigo', 'El código de amigo es obligatorio').not().isEmpty(),
+    validarCampos
+], getLeaderboard);
+
+
 router.get('/amigos/:codigo', [
     check('codigo', 'El código de amigo es obligatorio').not().isEmpty(),
     validarCampos
 ], getPerfilPublicoPorCodigo);
+
 
 router.post('/',[
     // validarJWT,
@@ -54,6 +66,19 @@ router.post('/',[
     validarSexo,
     validarNivelActividad,
 ], createUser);
+
+router.post('/amigos/solicitud', [
+    validarJWT,
+    check('codigoAmigo', 'El código de amigo es obligatorio').not().isEmpty(),
+    validarCampos
+], enviarSolicitudAmistad);
+
+router.post('/amigos/responder-solicitud', [
+    validarJWT,
+    check('idSolicitante', 'El ID del solicitante es obligatorio y debe ser válido').isMongoId(),
+    check('decision', 'La decisión es obligatoria y debe ser ACEPTAR o RECHAZAR').isIn(['ACEPTAR', 'RECHAZAR']),
+    validarCampos
+], responderSolicitudAmistad);
 
 router.put('/:id', [
     validarJWT,
@@ -87,5 +112,11 @@ router.delete('/:id', [
     check('id','el identificador no es válido').isMongoId(),
     validarCampos
 ], deleteUser);
+
+router.get('/amigos/:idAmigo', [
+    validarJWT,
+    param('idAmigo', 'El ID del amigo a eliminar debe ser un MongoID válido').isMongoId(),
+    validarCampos
+], deleteAmigo);
 
 module.exports = router;

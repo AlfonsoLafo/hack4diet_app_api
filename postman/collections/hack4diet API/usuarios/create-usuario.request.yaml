@@ -9,8 +9,8 @@ body:
   type: json
   content: |-
     {
-      "nombre": "demo2",
-      "email": "demo2@demo.com",
+      "nombre": "amigo",
+      "email": "amigo@demo.com",
       "password": "demo",
       "edad": 20,
       "sexo": "HOMBRE",

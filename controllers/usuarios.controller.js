@@ -79,6 +79,53 @@ const getUserByEmail = async(req, res = response) => {
     }
 }
 
+const getLeaderboard = async (req, res = response) => {
+    const idUsuario = req.uidToken;
+
+    try {
+        const usuario = await Usuario.findById(idUsuario);
+        if (!usuario) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No se encontró ningún usuario'
+            });
+        }
+
+        const leaderboard = usuario.amigos.map(amigo => {
+            
+            const { currentStreak, maximumStreak, points, badges } = amigo.opcionesPrivacidad;
+            const datosPublicosAmigo = {
+                nombre: amigo.nombre,
+                codigoAmigo: amigo.codigoAmigo,
+                avatar: amigo.avatar,
+                insigniaDestacada: amigo.insigniaDestacada
+            };
+
+            if (currentStreak)  datosPublicosAmigo.rachaActual = amigo.rachaActual;
+            if (maximumStreak)  datosPublicosAmigo.maximaRacha = amigo.maximaRacha;
+            if (points)         datosPublicosAmigo.puntos      = amigo.puntos;
+            if (badges)         datosPublicosAmigo.insigniasDesbloqueadas = amigo.insigniasDesbloqueadas;
+
+            return datosPublicosAmigo;
+        });
+
+        // Ordenar el Leaderboard por puntos de mayor a menor
+        leaderboard.sort((a, b) => (b.puntos || 0) - (a.puntos || 0));
+
+        res.json({
+            ok: true,
+            leaderboard
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al generar la tabla de clasificación'
+        });
+    }
+};
+
 const getPerfilPublicoPorCodigo = async (req, res = response) => {
     const codigo = req.params.codigo;
 
@@ -95,7 +142,6 @@ const getPerfilPublicoPorCodigo = async (req, res = response) => {
         // Extraemos las opciones de privacidad configuradas por el usuario
         const { currentStreak, maximumStreak, nivel, points, insignias } = usuario.opcionesPrivacidad;
 
-        console.log(usuario);
         const perfilPublico = {
             nombre: usuario.nombre,
             friendCode: usuario.friendCode,
@@ -118,6 +164,123 @@ const getPerfilPublicoPorCodigo = async (req, res = response) => {
         res.status(500).json({
             ok: false,
             msg: 'Error al procesar la solicitud del perfil público'
+        });
+    }
+};
+
+const enviarSolicitudAmistad = async (req, res = response) => {
+    const idSolicitante = req.uidToken;
+    const { codigoAmigo } = req.body;
+
+    try {
+        const usuarioDestino = await Usuario.findOne({ codigoAmigo: codigoAmigo });
+
+        if (!usuarioDestino) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No se encontró ningún usuario con ese código de amigo'
+            });
+        }
+
+        if (usuarioDestino._id.toString() === idSolicitante) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'No puedes enviarte una solicitud de amistad a ti mismo'
+            });
+        }
+
+        if (usuarioDestino.amigos.includes(idSolicitante)) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Ya eres amigo de este usuario'
+            });
+        }
+
+        if (usuarioDestino.solicitudesAmistad.includes(idSolicitante)) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Ya has enviado una solicitud de amistad a este usuario'
+            });
+        }
+
+        usuarioDestino.solicitudesAmistad.push(idSolicitante);
+        await usuarioDestino.save();
+
+        res.json({
+            ok: true,
+            msg: 'Solicitud de amistad enviada con éxito'
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al enviar la solicitud de amistad'
+        });
+    }
+};
+
+const responderSolicitudAmistad = async (req, res = response) => {
+    const miId = req.uidToken; // El usuario que está logueado (y recibió la solicitud)
+    const { idSolicitante, decision } = req.body;
+
+    try {
+        const yo = await Usuario.findById(miId);
+        const solicitante = await Usuario.findById(idSolicitante);
+
+        if (!yo || !solicitante) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Usuario o solicitante no encontrado'
+            });
+        }
+
+        if (!yo.solicitudesAmistad.includes(idSolicitante)) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'No tienes ninguna solicitud de amistad pendiente de este usuario'
+            });
+        }
+
+        if (decision === 'ACEPTAR') {
+
+            yo.amigos.push(idSolicitante);
+            solicitante.amigos.push(miId);
+
+            // Eliminamos la solicitud de mi lista de pendientes
+            yo.solicitudesAmistad = yo.solicitudesAmistad.filter(
+                id => id.toString() !== idSolicitante
+            );
+
+            // Guardamos los cambios en ambos documentos
+            await yo.save();
+            await solicitante.save();
+
+            return res.json({
+                ok: true,
+                msg: `Has aceptado la solicitud de amistad de ${solicitante.nombre}`
+            });
+
+        } else if (decision === 'RECHAZAR') {
+            
+            // Limpiamos la solicitud de mi lista de pendientes
+            yo.solicitudesAmistad = yo.solicitudesAmistad.filter(
+                id => id.toString() !== idSolicitante
+            );
+            
+            await yo.save();
+
+            return res.json({
+                ok: true,
+                msg: `Has rechazado la solicitud de amistad de ${solicitante.nombre}`
+            });
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al procesar la respuesta de la solicitud de amistad'
         });
     }
 };
@@ -394,12 +557,62 @@ const calcularMacronutrientes = (tipoPlan, nivelActividad, sexo, peso, altura, e
     return plan;
 }
 
+const deleteAmigo = async (req, res = response) => {
+    const miId = req.uidToken;
+    const idAmigo = req.params.idAmigo;
+
+    try {
+        const yo = await Usuario.findById(miId);
+        const amigo = await Usuario.findById(idAmigo);
+
+        if (!yo || !amigo) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Usuario o amigo no encontrado'
+            });
+        }
+
+        if (!yo.amigos.includes(idAmigo)) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Este usuario no se encuentra en tu lista de amigos'
+            });
+        }
+
+        yo.amigos = yo.amigos.filter(
+            id => id.toString() !== idAmigo
+        );
+        amigo.amigos = amigo.amigos.filter(
+            id => id.toString() !== miId
+        );
+
+        await yo.save();
+        await amigo.save();
+
+        res.json({
+            ok: true,
+            msg: `Has eliminado a ${amigo.nombre} de tus amigos con éxito`
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al intentar eliminar al amigo'
+        });
+    }
+};
+
 module.exports = {
     getUserById,
     getUserByEmail,
+    getLeaderboard,
+    getPerfilPublicoPorCodigo,
+    enviarSolicitudAmistad,
+    responderSolicitudAmistad,
     createUser,
     updateUser,
     updatePassword,
     deleteUser,
-    getPerfilPublicoPorCodigo
+    deleteAmigo
 }

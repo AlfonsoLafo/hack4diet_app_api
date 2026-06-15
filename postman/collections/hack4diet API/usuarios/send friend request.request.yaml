@@ -1,0 +1,16 @@
+$kind: http-request
+name: send friend request
+url: "{{baseUrl}}/api/usuarios/amigos/solicitud"
+method: POST
+headers:
+  x-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2YTJlYzc1YWNiMGFkZDg3YmI3ODRjZDMiLCJpYXQiOjE3ODE1NDgyMTQsImV4cCI6MTgxMzEwNTgxNH0.68PezNQszKbYgWAHizc1zHt_gzNOz5q8bduHki3W_88
+body:
+  type: json
+  content: "{\r
+
+    \    \"uid\": \"6a30450218632901ba02e1f3\",\r
+
+    \    \"codigoAmigo\": \"9A17A9E6\"\r
+
+    }"
+order: 3740
