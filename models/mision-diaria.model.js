@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 
-const MisionSchema = new mongoose.Schema({
+const MisionSchema = new Schema({
     idMision: { 
         type: Schema.Types.ObjectId, 
         ref: 'ListaMisiones', 
@@ -27,20 +27,6 @@ const MisionSchema = new mongoose.Schema({
     }, { collection: 'mision' }
 );
 
-const ListaMisionesSchema = new mongoose.Schema({
-    descripcion: {
-        type: String,
-        required: true
-    },
-    puntosMin: {
-        type: Number,
-        required: true
-    },
-    puntosMax: {
-        type: Number,
-        required: true
-    }
-});
 
 MisionSchema.method('toJSON', function(){
     const { __v, _id, ...object } = this.toObject();
@@ -48,12 +34,5 @@ MisionSchema.method('toJSON', function(){
     object.uid = _id;
     return object;
 });
-ListaMisionesSchema.method('toJSON', function(){
-    const { __v, _id, ...object } = this.toObject();
-    
-    object.uid = _id;
-    return object;
-});
 
 module.exports = model('Mision', MisionSchema);
-module.exports = model('ListaMisiones', ListaMisionesSchema);

@@ -1,0 +1,16 @@
+$kind: http-request
+name: add points
+url: "{{baseUrl}}/api/historial-puntos"
+method: POST
+headers:
+  x-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2YTMwNDUwMjE4NjMyOTAxYmEwMmUxZjMiLCJpYXQiOjE3ODE2MjEyMzksImV4cCI6MTgxMzE3ODgzOX0.n3GV8xGL8xaxUrBHi3UPZ9Xi4PwFh5CVfp1zU8XoJac
+body:
+  type: json
+  content: "{\r
+
+    \    \"puntosGanados\": 1234567890,\r
+
+    \    \"justificacion\": \"Juan Carlos me lo confirmó\"\r
+
+    }"
+order: 1781622201160

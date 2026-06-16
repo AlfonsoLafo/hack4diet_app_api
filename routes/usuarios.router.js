@@ -113,9 +113,9 @@ router.delete('/:id', [
     validarCampos
 ], deleteUser);
 
-router.get('/amigos/:idAmigo', [
+router.delete('/amigos/:idAmigo', [
     validarJWT,
-    param('idAmigo', 'El ID del amigo a eliminar debe ser un MongoID válido').isMongoId(),
+    check('idAmigo', 'El ID del amigo a eliminar debe ser un MongoID válido').isMongoId(),
     validarCampos
 ], deleteAmigo);
 

@@ -2,7 +2,7 @@ $kind: http-request
 name: create usuario
 method: POST
 url: "{{baseUrl}}/api/usuarios"
-order: 4000
+order: 3180
 headers:
   Content-Type: application/json
 body:

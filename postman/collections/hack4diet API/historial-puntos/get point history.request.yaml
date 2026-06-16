@@ -1,0 +1,9 @@
+$kind: http-request
+name: get point history
+url: "{{baseUrl}}/api/historial-puntos?limite=1"
+method: GET
+headers:
+  x-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2YTMwNDUwMjE4NjMyOTAxYmEwMmUxZjMiLCJpYXQiOjE3ODE2MjEyMzksImV4cCI6MTgxMzE3ODgzOX0.n3GV8xGL8xaxUrBHi3UPZ9Xi4PwFh5CVfp1zU8XoJac
+queryParams:
+  limite: "1"
+order: 1164363078517123

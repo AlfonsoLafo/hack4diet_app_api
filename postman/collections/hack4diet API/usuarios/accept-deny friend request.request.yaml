@@ -1,0 +1,16 @@
+$kind: http-request
+name: accept/deny friend request
+url: "{{baseUrl}}/api/usuarios/amigos/responder-solicitud"
+method: POST
+headers:
+  x-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2YTMwNDUwMjE4NjMyOTAxYmEwMmUxZjMiLCJpYXQiOjE3ODE2MjAyODgsImV4cCI6MTgxMzE3Nzg4OH0.4tz7TeoEMDkJudx1NueanGUCvNZNyXc3OLJMVPgFrcM
+body:
+  type: json
+  content: "{\r
+
+    \    \"decision\": \"ACEPTAR\",\r
+
+    \    \"idSolicitante\": \"6a2ec75acb0add87bb784cd3\"\r
+
+    }"
+order: 3827

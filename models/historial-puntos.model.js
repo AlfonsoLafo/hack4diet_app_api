@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 
-const HistorialPuntosSchema = new mongoose.Schema({
+const HistorialPuntosSchema = new Schema({
     idUsuario: { 
         type: Schema.Types.ObjectId, 
         ref: 'Usuario', 

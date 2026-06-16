@@ -1,7 +1,9 @@
 $kind: http-request
 name: login
 method: POST
-url: "{{baseUrl}}/api/login"
+url: "{{baseUrl}}/api/login?="
+queryParams:
+  "": ""
 order: 1000
 headers:
   Content-Type: application/json
@@ -9,6 +11,6 @@ body:
   type: json
   content: |-
     {
-      "email": "demo@demo.com",
+      "email": "amigo@demo.com",
       "password": "demo"
     }

@@ -1,6 +1,9 @@
 $kind: http-request
+name: get usuario by email
 url: "{{baseUrl}}/api/usuarios/email/{{email}}"
 method: GET
+headers:
+  x-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2YTJlYzc1YWNiMGFkZDg3YmI3ODRjZDMiLCJpYXQiOjE3ODE2MjAxNTUsImV4cCI6MTgxMzE3Nzc1NX0.1O_0vgm8tX2roDD9EUpxl4_Y3U1g4jPRj-yW5-F4Xco
 body:
   type: json
   content: ""
