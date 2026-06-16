@@ -20,7 +20,7 @@ const getUserById = async(req, res = response) => {
     console.log('Obteniendo usuario con id: ', uid);
 
     try {
-        const usuario = await Usuario.findById(uid);
+        const usuario = await Usuario.findById(uid).select('-solicitudesAmistad -misionesCompletadas -recetasGuardadas -password');
 
         // KO -> usuario no existe
         if(!usuario) {
@@ -52,7 +52,7 @@ const getUserByEmail = async(req, res = response) => {
     console.log('Obteniendo usuario con email: ', email);
 
     try {
-        const usuario = await Usuario.findOne({ email });
+        const usuario = await Usuario.findOne({ email }).select('-solicitudesAmistad -misionesCompletadas -recetasGuardadas -password');
 
         // KO -> usuario no existe
         // No enviamos error 400 porque queremos que siga la ejecución

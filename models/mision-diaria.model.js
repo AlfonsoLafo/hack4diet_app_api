@@ -17,8 +17,8 @@ const MisionSchema = new Schema({
     },
     estado: { 
         type: String, 
-        enum: ['pendiente', 'completada', 'fallida'], 
-        default: 'pendiente' 
+        enum: ['PENDIENTE', 'COMPLETADA', 'FALLIDA'], 
+        default: 'PENDIENTE' 
     },
     puntosOtorgados: { 
         type: Number, 
