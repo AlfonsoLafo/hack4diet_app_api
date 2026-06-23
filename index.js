@@ -39,6 +39,7 @@ app.use('/api/uploads',                 require('./routes/uploads.router'));
 app.use('/api/avatares',                require('./routes/avatar.router'));
 app.use('/api/insignias',               require('./routes/insignia.router'));
 app.use('/api/historial-puntos',        require('./routes/historial-puntos.router'));
+app.use('/api/recetas',                 require('./routes/receta.router'))
 
 app.use('/api/open-food-facts',         require('./external-services/open-food-facts.service'));
 

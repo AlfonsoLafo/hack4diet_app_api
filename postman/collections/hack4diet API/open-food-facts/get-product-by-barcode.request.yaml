@@ -1,5 +1,0 @@
-$kind: http-request
-name: 'get product by barcode'
-method: GET
-url: '{{baseUrl}}/api/open-food-facts/product/{{barcode}}'
-order: 1000

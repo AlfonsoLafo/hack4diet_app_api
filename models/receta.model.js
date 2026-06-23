@@ -14,13 +14,20 @@ const RecetaSchema = Schema(
         descripcion: {
             type: String,
         },
-        ingredientes: {
-            type: Number,
-            required: true
-        },
-        pasos: {
+        ingredientes: [ {
             type: String,
             required: true
+            }
+        ],
+        pasos: [ {
+            type: String,
+            required: true
+            }
+        ],
+        dificultad:{
+            type: String,
+            required: true,
+            enum: ['FACIL', 'MEDIA', 'DIFICIL'], 
         },
         tiempoPreparacion:{
             type: Number,

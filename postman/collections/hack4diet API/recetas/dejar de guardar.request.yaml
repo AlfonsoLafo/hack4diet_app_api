@@ -1,0 +1,5 @@
+$kind: http-request
+name: dejar de guardar
+url: "{{baseUrl}}/api/recetas/{{id}}/guardar"
+method: DELETE
+order: 7000

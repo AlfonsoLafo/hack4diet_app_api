@@ -1,5 +1,4 @@
 $kind: http-request
-name: New Request
 url: "{{baseUrl}}/api/avatares"
 method: GET
 order: 1781020784011

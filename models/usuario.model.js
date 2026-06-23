@@ -89,6 +89,15 @@ const UsuarioSchema = Schema(
             type: Number,
             default: 0
         },
+        historialRachas: [{
+            fechaInicio: {
+                type: Date,
+                required: true
+            },
+            fechaFin: {
+                type: Date
+            },
+        }],
         maximaRacha: {
             type: Number,
             default: 0

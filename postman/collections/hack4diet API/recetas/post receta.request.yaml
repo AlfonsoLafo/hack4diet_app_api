@@ -1,0 +1,59 @@
+$kind: http-request
+url: "{{baseUrl}}/api/recetas"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"nombre\": \"Ensalada de Quinoa y Aguacate\",\r
+
+    \    \"descripcion\": \"Una ensalada fresca, rápida y cargada de
+    nutrientes.\",\r
+
+    \    \"ingredientes\": [\r
+
+    \        \"1 taza de quinoa\",\r
+
+    \        \"1 aguacate maduro\",\r
+
+    \        \"100g de tomates cherry\",\r
+
+    \        \"1 limón (jugo)\",\r
+
+    \        \"Aceite de oliva y sal al gusto\"\r
+
+    \    ],\r
+
+    \    \"pasos\": [\r
+
+    \        \"Lavar minuciosamente la quinoa bajo agua fría.\",\r
+
+    \        \"Hervir la quinoa en dos tazas de agua durante 15 minutos y dejar
+    enfriar.\",\r
+
+    \        \"Cortar el aguacate en dados y los tomates cherry por la
+    mitad.\",\r
+
+    \        \"Mezclar todos los ingredientes en un bol grande.\",\r
+
+    \        \"Aliñar con el jugo de limón, el aceite de oliva y un toque de sal
+    antes de servir.\"\r
+
+    \    ],\r
+
+    \    \"dificultad\": \"FACIL\",\r
+
+    \    \"tiempoPreparacion\": 20,\r
+
+    \    \"porciones\": 2,\r
+
+    \    \"calorias\": 350,\r
+
+    \    \"carbohidratos\": 45,\r
+
+    \    \"proteinas\": 12,\r
+
+    \    \"grasas\": 14\r
+
+    }"
+order: 4000

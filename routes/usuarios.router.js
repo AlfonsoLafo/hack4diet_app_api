@@ -11,16 +11,24 @@ const {
     getUserByEmail,
     getLeaderboard,
     getPerfilPublicoPorCodigo,
+    // Devuelve la racha actual a la vez que la fecha de inicio de esta
+    getRachaActual,
+    // Devuelve las rachas en un periodo
+    getHistorialRachas,
     enviarSolicitudAmistad,
     responderSolicitudAmistad,
     createUser,
+    // Añade un nuevo registro de racha
+    actualizarRacha,
     updateUser,
     updatePassword,
+    // Comprueba si la racha ha expirado, llamar al inicio
+    verificarRachaExpirada,
     deleteUser,
     deleteAmigo,
 } = require('../controllers/usuarios.controller');
 
-const router= Router();
+const router=Router();
 
 router.get('/:id', [
     validarJWT,
@@ -46,6 +54,23 @@ router.get('/amigos/:codigo', [
     validarCampos
 ], getPerfilPublicoPorCodigo);
 
+router.get('/racha', [
+    validarJWT
+], getRachaActual);
+
+router.get('/historial-racha', [
+    check('mes', 'El mes es obligatorio y debe ser un número entre 1 y 12').optional().isInt({ min: 1, max: 12 }),
+    check('anio', 'El año debe ser un número válido').optional().isInt({ min: 2020 }),
+    validarCampos
+], getHistorialRachas);
+
+router.post('/racha', [
+    validarJWT
+], actualizarRacha);
+
+router.put('/racha/verificar', [
+    validarJWT
+], verificarRachaExpirada);
 
 router.post('/',[
     // validarJWT,

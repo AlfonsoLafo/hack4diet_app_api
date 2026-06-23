@@ -20,7 +20,7 @@ const getUserById = async(req, res = response) => {
     console.log('Obteniendo usuario con id: ', uid);
 
     try {
-        const usuario = await Usuario.findById(uid).select('-solicitudesAmistad -misionesCompletadas -recetasGuardadas -password');
+        const usuario = await Usuario.findById(uid).select('-rachaActual -maximaRacha -historialRachas -solicitudesAmistad -misionesCompletadas -recetasGuardadas -password');
 
         // KO -> usuario no existe
         if(!usuario) {
@@ -52,7 +52,7 @@ const getUserByEmail = async(req, res = response) => {
     console.log('Obteniendo usuario con email: ', email);
 
     try {
-        const usuario = await Usuario.findOne({ email }).select('-solicitudesAmistad -misionesCompletadas -recetasGuardadas -password');
+        const usuario = await Usuario.findOne({ email }).select('-rachaActual -maximaRacha -historialRachas -solicitudesAmistad -misionesCompletadas -recetasGuardadas -password');
 
         // KO -> usuario no existe
         // No enviamos error 400 porque queremos que siga la ejecución
@@ -165,6 +165,74 @@ const getPerfilPublicoPorCodigo = async (req, res = response) => {
             ok: false,
             msg: 'Error al procesar la solicitud del perfil público'
         });
+    }
+};
+
+const getRachaActual = async (req, res = response) => {
+    const uid = req.uidToken; // Extraído de validarJWT
+
+    try {
+        const usuario = await Usuario.findById(uid).select('rachaActual historialRachas');
+        
+        if (!usuario) {
+            return res.status(404).json({ ok: false, msg: 'Usuario no encontrado' });
+        }
+
+        // Si hay historial, la racha en curso está al final siempre que no tenga fechaFin
+        const rachaActiva = usuario.historialRachas && usuario.historialRachas.length > 0 
+            ? usuario.historialRachas[usuario.historialRachas.length - 1] 
+            : null;
+
+        res.json({
+            ok: true,
+            rachaActual: usuario.rachaActual,
+            fechaInicioActiva: rachaActiva ? rachaActiva.fechaInicio : null
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ ok: false, msg: 'Error al obtener la racha actual' });
+    }
+};
+
+const getHistorialRachas = async (req, res = response) => {
+    const uid = req.uidToken;
+    const { mes, anio } = req.query;
+
+    try {
+        const usuario = await Usuario.findById(uid).select('rachaActual maximaRacha historialRachas');
+        
+        if (!usuario) {
+            return res.status(404).json({ ok: false, msg: 'Usuario no encontrado' });
+        }
+
+        let historialFiltrado = usuario.historialRachas || [];
+
+        if (mes && anio) {
+            const m = parseInt(mes) - 1; // JS Months 0-11
+            const a = parseInt(anio);
+
+            historialFiltrado = historialFiltrado.filter(racha => {
+                const inicio = new Date(racha.fechaInicio);
+                const fin = racha.fechaFin ? new Date(racha.fechaFin) : new Date(); // Si no tiene fin, está activa hoy
+
+                const entraEnAnio = inicio.getFullYear() === a || fin.getFullYear() === a;
+                const entraEnMes = inicio.getMonth() === m || fin.getMonth() === m || (inicio.getMonth() < m && fin.getMonth() > m);
+
+                return entraEnAnio && entraEnMes;
+            });
+        }
+
+        res.json({
+            ok: true,
+            rachaActual: usuario.rachaActual,
+            maximaRacha: usuario.maximaRacha,
+            historial: historialFiltrado
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ ok: false, msg: 'Error al procesar el historial de rachas' });
     }
 };
 
@@ -355,6 +423,70 @@ const createUser = async(req, res = response) => {
     }
 }
 
+const actualizarRacha = async (req, res = response) => {
+    const uid = req.uidToken;
+
+    try {
+        const usuario = await Usuario.findById(uid);
+        
+        if (!usuario) {
+            return res.status(404).json({ ok: false, msg: 'Usuario no encontrado' });
+        }
+
+        const hoy = new Date();
+        hoy.setUTCHours(0, 0, 0, 0);
+
+        if (usuario.historialRachas.length === 0 || usuario.rachaActual === 0) {
+            usuario.rachaActual = 1;
+            usuario.historialRachas.push({ fechaInicio: hoy });
+            usuario.maximaRacha = Math.max(usuario.rachaActual, usuario.maximaRacha || 0);
+            
+            await usuario.save();
+            return res.json({ ok: true, msg: 'Racha iniciada', rachaActual: usuario.rachaActual });
+        }
+
+        // else
+        const ultimaRacha = usuario.historialRachas[usuario.historialRachas.length - 1];
+        
+        const ultimoDiaActivo = new Date(ultimaRacha.fechaInicio);
+        ultimoDiaActivo.setUTCHours(0, 0, 0, 0);
+        ultimoDiaActivo.setUTCDate(ultimoDiaActivo.getUTCDate() + (usuario.rachaActual - 1));
+
+        // Diferencia en días entre hoy y el último día registrado con éxito
+        const diffTiempo = hoy.getTime() - ultimoDiaActivo.getTime();
+        const diasDeDiferencia = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
+
+        if (diasDeDiferencia === 0) {
+            // Caso 1: Ya registró, mostramos la racha actual
+            return res.json({ ok: true, msg: 'Actividad guardada. Racha ya actualizada hoy.', rachaActual: usuario.rachaActual });
+        } 
+        
+        if (diasDeDiferencia === 1) {
+            // Caso 2: Aumentamos la racha.
+            usuario.rachaActual += 1;
+            usuario.maximaRacha = Math.max(usuario.rachaActual, usuario.maximaRacha || 0);
+        } else {
+            // Caso 3: Rompio la racha.
+            ultimaRacha.fechaFin = ultimoDiaActivo;
+            usuario.rachaActual = 1;
+            usuario.historialRachas.push({ fechaInicio: hoy });
+        }
+
+        await usuario.save();
+        
+        res.json({
+            ok: true,
+            msg: diasDeDiferencia === 1 ? 'Racha incrementada' : 'Racha rota. Nueva racha iniciada',
+            rachaActual: usuario.rachaActual,
+            maximaRacha: usuario.maximaRacha
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ ok: false, msg: 'Error al subir una racha' });
+    }
+};
+
 const updateUser = async(req, res = response) => {
 
     
@@ -461,6 +593,60 @@ const updatePassword = async(req, res = response) => {
 
 
 }
+
+const verificarRachaExpirada = async (req, res = response) => {
+    const uid = req.uidToken;
+
+    try {
+        const usuario = await Usuario.findById(uid);
+        
+        if (!usuario) {
+            return res.status(404).json({ ok: false, msg: 'Usuario no encontrado' });
+        }
+
+        // Si ya está a 0 o no tiene historial, return
+        if (!usuario.rachaActual || usuario.rachaActual === 0 || !usuario.historialRachas || usuario.historialRachas.length === 0) {
+            return res.json({ ok: true, msg: 'Sin racha activa que verificar.', rachaActual: 0 });
+        }
+
+        const hoy = new Date();
+        hoy.setUTCHours(0, 0, 0, 0);
+
+        const ultimaRacha = usuario.historialRachas[usuario.historialRachas.length - 1];
+        const ultimoDiaActivoReal = new Date(ultimaRacha.fechaInicio);
+        ultimoDiaActivoReal.setUTCHours(0, 0, 0, 0);
+        ultimoDiaActivoReal.setUTCDate(ultimoDiaActivoReal.getUTCDate() + (usuario.rachaActual - 1));
+
+        // Calculamos cuántos días han pasado desde su último día activo hasta HOY
+        const diffTiempo = hoy.getTime() - ultimoDiaActivoReal.getTime();
+        const diasSinRegistrar = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
+
+        if (diasSinRegistrar > 1) {
+            ultimaRacha.fechaFin = ultimoDiaActivoReal;
+            usuario.rachaActual = 0;
+
+            await usuario.save();
+
+            return res.json({
+                ok: true,
+                msg: 'La racha había expirado. Se ha actualizado el historial.',
+                rachaActual: usuario.rachaActual,
+                rachaRota: true
+            });
+        }
+
+        res.json({
+            ok: true,
+            msg: 'La racha sigue vigente.',
+            rachaActual: usuario.rachaActual,
+            rachaRota: false
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ ok: false, msg: 'Error al verificar la expiración de la racha' });
+    }
+};
 
 const deleteUser = async(req, res = response) => {
     const uid = req.params.id;
@@ -608,11 +794,15 @@ module.exports = {
     getUserByEmail,
     getLeaderboard,
     getPerfilPublicoPorCodigo,
+    getRachaActual,
+    getHistorialRachas,
     enviarSolicitudAmistad,
     responderSolicitudAmistad,
     createUser,
     updateUser,
     updatePassword,
+    actualizarRacha,
+    verificarRachaExpirada,
     deleteUser,
     deleteAmigo
 }
