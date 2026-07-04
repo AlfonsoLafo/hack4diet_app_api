@@ -30,39 +30,40 @@ const {
 
 const router=Router();
 
-router.get('/:id', [
-    validarJWT,
-    check('id','El id de usuario debe ser valido').isMongoId(),
-    validarCampos,
-], getUserById);
-
-router.get('/email/:email', [
-    check('email','El argumento email es obligatorio').not().isEmpty(),
-    check('email','El email es incorrecto').isEmail(),
-    validarCampos,
-], getUserByEmail);
-
 router.get('/amigos/', [
     validarJWT,
     check('codigo', 'El código de amigo es obligatorio').not().isEmpty(),
     validarCampos
 ], getLeaderboard);
 
+router.get('/racha', [
+    validarJWT
+], getRachaActual);
+
+router.get('/historial-racha', [
+    validarJWT,
+    check('mes', 'El mes es obligatorio y debe ser un número entre 1 y 12').optional().isInt({ min: 1, max: 12 }),
+    check('anio', 'El año debe ser un número válido').optional().isInt({ min: 2020 }),
+    validarCampos
+], getHistorialRachas);
 
 router.get('/amigos/:codigo', [
     check('codigo', 'El código de amigo es obligatorio').not().isEmpty(),
     validarCampos
 ], getPerfilPublicoPorCodigo);
 
-router.get('/racha', [
-    validarJWT
-], getRachaActual);
+router.get('/:id', [
+    validarJWT,
+    check('id','El id de usuario debe ser valido').isMongoId(),
+    validarCampos,
+], getUserById);
 
-router.get('/historial-racha', [
-    check('mes', 'El mes es obligatorio y debe ser un número entre 1 y 12').optional().isInt({ min: 1, max: 12 }),
-    check('anio', 'El año debe ser un número válido').optional().isInt({ min: 2020 }),
-    validarCampos
-], getHistorialRachas);
+
+router.get('/email/:email', [
+    check('email','El argumento email es obligatorio').not().isEmpty(),
+    check('email','El email es incorrecto').isEmail(),
+    validarCampos,
+], getUserByEmail);
 
 router.post('/racha', [
     validarJWT

@@ -32,6 +32,12 @@ const getHistorialPuntos = async (req, res = response) => {
         });
     }
 };
+// auxiliar
+const calcularNivel = (puntos) => {
+    if (!puntos || puntos < 0) return 1;
+    // Math.floor para redondear hacia abajo. Todos empiezan en nivel 1.
+    return Math.floor(0.2 * Math.sqrt(puntos)) + 1;
+};
 
 const crearEntradaHistorial = async (req, res = response) => {
     const idUsuario = req.uidToken;
@@ -55,14 +61,19 @@ const crearEntradaHistorial = async (req, res = response) => {
 
         await nuevaEntrada.save();
 
+        const nivelAnterior = usuario.nivel;
         usuario.puntos = (usuario.puntos || 0) + Number(puntosGanados);
+        usuario.nivel = calcularNivel(usuario.puntos);
+        const subioDeNivel = usuario.nivel > nivelAnterior;
         await usuario.save();
 
         res.status(201).json({
             ok: true,
             msg: 'Transacción de puntos registrada con éxito',
             transaccion: nuevaEntrada,
-            puntosTotalesActuales: usuario.puntos
+            puntosTotalesActuales: usuario.puntos,
+            nivelActual: usuario.nivel,
+            subioDeNivel
         });
 
     } catch (error) {

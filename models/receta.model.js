@@ -7,6 +7,10 @@ const RecetaSchema = Schema(
             ref: 'Usuario', 
             required: true 
         },
+        publico: {
+            type: Boolean,
+            default: false
+        },
         nombre: {
             type: String,
             required: true

@@ -2,7 +2,7 @@ $kind: http-request
 name: 'update usuario'
 method: PUT
 url: '{{baseUrl}}/api/usuarios/{{userId}}'
-order: 5000
+order: 8000
 headers:
   - key: Content-Type
     value: application/json

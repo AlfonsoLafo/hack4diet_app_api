@@ -1,9 +1,10 @@
 const { response } = require('express');
-const Mision = require('../models/mision.model');
-const HistorialPuntos = require('../models/historialPuntos.model');
+const Mision = require('../models/mision-diaria.model');
+const MisionLista = require('../models/mision-lista.model');
+const HistorialPuntos = require('../models/historial-puntos.model');
 const Usuario = require('../models/usuario.model');
 
-const getMisionDiaria = async (req, res = response) => {
+const generarMisionDiaria = async (req, res = response) => {
     const { idUsuario } = req.params;
     const idUsuarioToken = req.uidToken;
 
@@ -15,48 +16,49 @@ const getMisionDiaria = async (req, res = response) => {
     }
 
     try {
-        // Calcular el rango de tiempo del día de HOY (00:00:00 a 23:59:59)
         const checkInicioDia = new Date();
         checkInicioDia.setHours(0, 0, 0, 0);
 
         const checkFinDia = new Date();
         checkFinDia.setHours(23, 59, 59, 999);
 
+        await Mision.updateMany(
+            {
+                idUsuario,
+                estado: 'PENDIENTE',
+                fecha: { $lt: checkInicioDia }
+            },
+            {
+                $set: { estado: 'FALLIDA' }
+            }
+        );
+
         let misionHoy = await Mision.findOne({
             idUsuario,
             fecha: { $gte: checkInicioDia, $lte: checkFinDia }
         }).populate('idMision');
 
-        // Si existe, la devolvemos
-        if (misionHoy) {
+        // Si existe, devolvemos ok indicando que no es nueva
+        if (misionHoy) {    
             return res.json({
                 ok: true,
-                msg: 'Misión diaria',
-                nueva: false,
-                mision: {
-                    uid: misionHoy._id,
-                    idUsuario: misionHoy.idUsuario,
-                    fecha: misionHoy.fecha,
-                    estado: misionHoy.estado,
-                    puntosOtorgados: misionHoy.puntosOtorgados,
-                    descripcion: misionHoy.idMision ? misionHoy.idMision.descripcion : 'Sin descripción'
-                }
+                msg: 'Misión diaria ya existe',
+                nueva: false
             });
         }
 
         // Si no existe, procedemos a generar una nueva
-        const misionesDisponibles = await ListaMisiones.aggregate([{ $sample: { size: 1 } }]);
+        const misionesDisponibles = await MisionLista.aggregate([{ $sample: { size: 1 } }]);
 
         if (!misionesDisponibles || misionesDisponibles.length === 0) {
             return res.status(404).json({
                 ok: false,
-                msg: 'No hay misiones configuradas en el repositorio (ListaMisiones)'
+                msg: 'No hay misiones configuradas en el repositorio (MisionLista)'
             });
         }
 
         const misionAleatoria = misionesDisponibles[0];
 
-        // Calcular los puntos otorgados aleatorios entre el mínimo y el máximo de esa misión
         const min = misionAleatoria.puntosMin;
         const max = misionAleatoria.puntosMax;
         const puntosCalculados = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -73,16 +75,8 @@ const getMisionDiaria = async (req, res = response) => {
 
         res.status(201).json({
             ok: true,
-            msg: 'Nueva misión diaria',
-            nueva: true,
-            mision: {
-                uid: nuevaMisionAsignada._id,
-                idUsuario: nuevaMisionAsignada.idUsuario,
-                fecha: nuevaMisionAsignada.fecha,
-                estado: nuevaMisionAsignada.estado,
-                puntosOtorgados: nuevaMisionAsignada.puntosOtorgados,
-                descripcion: misionAleatoria.descripcion
-            }
+            msg: 'Nueva misión diaria creada',
+            nueva: true
         });
 
     } catch (error) {
@@ -116,14 +110,14 @@ const actualizarEstadoMision = async (req, res = response) => {
             });
         }
 
-        if (mision.estado !== 'pendiente') {
+        if (mision.estado !== 'PENDIENTE') {
             return res.status(400).json({
                 ok: false,
                 msg: `Esta misión ya fue marcada previamente`
             });
         }
 
-        if (estado === 'completada') {
+        if (estado === 'COMPLETADA') {
             const puntosAGanar = mision.puntosOtorgados;
             const descripcionMision = mision.idMision.descripcion;
 
@@ -165,51 +159,46 @@ const actualizarEstadoMision = async (req, res = response) => {
 
 const getHistorialMisionesUsuario = async (req, res = response) => {
     const { idUsuario } = req.params;
-    const { limite = 10, desde, hasta } = req.query;
 
     try {
-        let queryFiltro = { idUsuario };
-
-        if (desde || hasta) {
-            queryFiltro.fecha = {};
-            if (desde) queryFiltro.fecha.$gte = new Date(desde);
-            if (hasta) queryFiltro.fecha.$lte = new Date(hasta);
-        }
-
-        const misionesDB = await Mision.find(queryFiltro)
-            .populate('idMision') // Traemos el objeto completo de ListaMisiones temporalmente
+        // Buscamos las misiones, ordenamos por fecha descendente y limitamos a 15
+        const misiones = await Mision.find({ idUsuario })
+            .populate('idMision', 'descripcion puntos') // Hacemos populate para tener los textos
             .sort({ fecha: -1 })
-            .limit(Number(limite));
+            .limit(15);
 
-        const historialMisiones = misionesDB.map(misionDoc => {
-            const mision = misionDoc.toObject(); 
+        // Mapeamos para que el frontend reciba un objeto limpio (y arreglamos los puntos)
+        const misionesFormateadas = misiones.map(m => {
+            const estadoReal = String(m.estado).toUpperCase();
+            let puntos = 0;
+
+            if (estadoReal === 'COMPLETADA' || estadoReal === 'PENDIENTE') {
+                puntos = m.puntosOtorgados || (m.idMision ? m.idMision.puntos : 10);
+            }
 
             return {
-                uid: mision._id, // Usamos la consistencia de tu toJSON()
-                fecha: mision.fecha,
-                estado: mision.estado,
-                puntosOtorgados: mision.puntosOtorgados,
-                // Extraemos la descripción del objeto poblado de forma segura
-                descripcion: mision.idMision ? mision.idMision.descripcion : 'Misión sin descripción'
+                uid: m._id,
+                idUsuario: m.idUsuario,
+                fecha: m.fecha,
+                estado: estadoReal,
+                puntosOtorgados: puntos,
+                descripcion: m.idMision ? m.idMision.descripcion : 'Sin descripción'
             };
         });
 
         res.json({
             ok: true,
-            misiones: historialMisiones
+            misiones: misionesFormateadas
         });
 
     } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            ok: false,
-            msg: 'Error al recuperar el historial de misiones del usuario'
-        });
+        console.error(error);
+        res.status(500).json({ ok: false, msg: 'Error al obtener el historial de misiones' });
     }
 };
 
 module.exports = {
-    getMisionDiaria,
+    generarMisionDiaria,
     getHistorialMisionesUsuario,
     actualizarEstadoMision,
 };

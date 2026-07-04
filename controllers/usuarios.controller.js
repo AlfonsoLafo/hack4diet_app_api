@@ -178,15 +178,29 @@ const getRachaActual = async (req, res = response) => {
             return res.status(404).json({ ok: false, msg: 'Usuario no encontrado' });
         }
 
-        // Si hay historial, la racha en curso está al final siempre que no tenga fechaFin
-        const rachaActiva = usuario.historialRachas && usuario.historialRachas.length > 0 
-            ? usuario.historialRachas[usuario.historialRachas.length - 1] 
-            : null;
+        let rachaRegistradaHoy = false;
+
+        if (usuario.rachaActual > 0 && usuario.historialRachas && usuario.historialRachas.length > 0) {
+            const ultimaRacha = usuario.historialRachas[usuario.historialRachas.length - 1];
+            
+            const hoy = new Date();
+            hoy.setUTCHours(0, 0, 0, 0);
+
+            const inicio = new Date(ultimaRacha.fechaInicio);
+            inicio.setUTCHours(0, 0, 0, 0);
+
+            // Calcula el último día
+            const ultimoDiaRegistrado = new Date(inicio);
+            ultimoDiaRegistrado.setUTCDate(ultimoDiaRegistrado.getUTCDate() + (usuario.rachaActual - 1));
+            if (ultimoDiaRegistrado.getTime() === hoy.getTime()) {
+                rachaRegistradaHoy = true;
+            }
+        }
 
         res.json({
             ok: true,
             rachaActual: usuario.rachaActual,
-            fechaInicioActiva: rachaActiva ? rachaActiva.fechaInicio : null
+            rachaRegistradaHoy
         });
 
     } catch (error) {
@@ -201,7 +215,6 @@ const getHistorialRachas = async (req, res = response) => {
 
     try {
         const usuario = await Usuario.findById(uid).select('rachaActual maximaRacha historialRachas');
-        
         if (!usuario) {
             return res.status(404).json({ ok: false, msg: 'Usuario no encontrado' });
         }
@@ -423,6 +436,11 @@ const createUser = async(req, res = response) => {
     }
 }
 
+const calcularPuntosRacha = (dias) => {
+    if (dias >= 7) return 15; // Límite máximo
+    return 3 + ((dias - 1) * 2); // Progresión: 3, 5, 7, 9, 11, 13, 15
+};
+
 const actualizarRacha = async (req, res = response) => {
     const uid = req.uidToken;
 
@@ -465,20 +483,26 @@ const actualizarRacha = async (req, res = response) => {
             // Caso 2: Aumentamos la racha.
             usuario.rachaActual += 1;
             usuario.maximaRacha = Math.max(usuario.rachaActual, usuario.maximaRacha || 0);
+            mensaje = '¡Racha incrementada!';
         } else {
-            // Caso 3: Rompio la racha.
+            // Caso 3: Rompio la racha. Inicia una nueva
             ultimaRacha.fechaFin = ultimoDiaActivo;
             usuario.rachaActual = 1;
             usuario.historialRachas.push({ fechaInicio: hoy });
+            mensaje = 'Nueva racha iniciada.';
         }
+
+        // Sequencia: 3, 5, 7, 9, 11, 13, 15, 15, 15 ...
+        const puntosGanados = Math.min(3 + ((usuario.rachaActual-1)*2), 15);
 
         await usuario.save();
         
         res.json({
             ok: true,
-            msg: diasDeDiferencia === 1 ? 'Racha incrementada' : 'Racha rota. Nueva racha iniciada',
+            msg: mensaje,
             rachaActual: usuario.rachaActual,
-            maximaRacha: usuario.maximaRacha
+            maximaRacha: usuario.maximaRacha,
+            puntosGanados
         });
 
     } catch (error) {
@@ -596,7 +620,6 @@ const updatePassword = async(req, res = response) => {
 
 const verificarRachaExpirada = async (req, res = response) => {
     const uid = req.uidToken;
-
     try {
         const usuario = await Usuario.findById(uid);
         
@@ -616,18 +639,17 @@ const verificarRachaExpirada = async (req, res = response) => {
         const ultimoDiaActivoReal = new Date(ultimaRacha.fechaInicio);
         ultimoDiaActivoReal.setUTCHours(0, 0, 0, 0);
         ultimoDiaActivoReal.setUTCDate(ultimoDiaActivoReal.getUTCDate() + (usuario.rachaActual - 1));
-
         // Calculamos cuántos días han pasado desde su último día activo hasta HOY
         const diffTiempo = hoy.getTime() - ultimoDiaActivoReal.getTime();
-        const diasSinRegistrar = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
+        const diasSinRegistrar = Math.round(diffTiempo / (1000 * 60 * 60 * 24));
 
         if (diasSinRegistrar > 1) {
+            
             ultimaRacha.fechaFin = ultimoDiaActivoReal;
             usuario.rachaActual = 0;
-
             await usuario.save();
 
-            return res.json({
+            return res.json({  
                 ok: true,
                 msg: 'La racha había expirado. Se ha actualizado el historial.',
                 rachaActual: usuario.rachaActual,

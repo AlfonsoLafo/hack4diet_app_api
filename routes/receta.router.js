@@ -18,6 +18,11 @@ const router = Router();
 
 router.use(validarJWT);
 
+router.get('/amigo/:codigo', [
+    param('codigo', 'El código de amigo es obligatorio').not().isEmpty(),
+    validarCampos
+], getRecetasAmigo);
+
 router.get('/:idUsuario', [
     param('idUsuario', 'El ID del usuario debe ser un MongoID válido').isMongoId(),
     validarCampos
@@ -61,11 +66,6 @@ router.delete('/:id', [
     param('id', 'El ID de la receta debe ser un MongoID válido').isMongoId(),
     validarCampos
 ], eliminarReceta);
-
-router.get('/amigo/:codigo', [
-    param('codigo', 'El código de amigo es obligatorio').not().isEmpty(),
-    validarCampos
-], getRecetasAmigo);
 
 router.post('/:id/guardar', [
     param('id', 'El ID de la receta debe ser un MongoID válido').isMongoId(),
