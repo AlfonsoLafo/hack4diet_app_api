@@ -83,7 +83,8 @@ const getLeaderboard = async (req, res = response) => {
     const idUsuario = req.uidToken;
 
     try {
-        const usuario = await Usuario.findById(idUsuario);
+        const usuario = await Usuario.findById(idUsuario).populate('amigos.uid');
+        
         if (!usuario) {
             return res.status(404).json({
                 ok: false,
@@ -91,14 +92,18 @@ const getLeaderboard = async (req, res = response) => {
             });
         }
 
-        const leaderboard = usuario.amigos.map(amigo => {
+        const leaderboard = usuario.amigos.map(amigoRef => {
+            const amigo = amigoRef.uid; 
+            if (!amigo) return null; 
+
+            const { currentStreak, maximumStreak, points, badges } = amigo.opcionesPrivacidad || {};
             
-            const { currentStreak, maximumStreak, points, badges } = amigo.opcionesPrivacidad;
             const datosPublicosAmigo = {
                 nombre: amigo.nombre,
                 codigoAmigo: amigo.codigoAmigo,
                 avatar: amigo.avatar,
-                insigniaDestacada: amigo.insigniaDestacada
+                insigniaDestacada: amigo.insigniaDestacada,
+                esYo: false
             };
 
             if (currentStreak)  datosPublicosAmigo.rachaActual = amigo.rachaActual;
@@ -107,9 +112,21 @@ const getLeaderboard = async (req, res = response) => {
             if (badges)         datosPublicosAmigo.insigniasDesbloqueadas = amigo.insigniasDesbloqueadas;
 
             return datosPublicosAmigo;
+            
+        }).filter(item => item !== null);
+
+        leaderboard.push({
+            nombre: usuario.nombre,
+            codigoAmigo: usuario.codigoAmigo,
+            avatar: usuario.avatar,
+            insigniaDestacada: usuario.insigniaDestacada,
+            rachaActual: usuario.rachaActual,
+            maximaRacha: usuario.maximaRacha,
+            puntos: usuario.puntos,
+            insigniasDesbloqueadas: usuario.insigniasDesbloqueadas,
+            esYo: true
         });
 
-        // Ordenar el Leaderboard por puntos de mayor a menor
         leaderboard.sort((a, b) => (b.puntos || 0) - (a.puntos || 0));
 
         res.json({
@@ -172,7 +189,7 @@ const getRachaActual = async (req, res = response) => {
     const uid = req.uidToken; // Extraído de validarJWT
 
     try {
-        const usuario = await Usuario.findById(uid).select('rachaActual historialRachas');
+        const usuario = await Usuario.findById(uid).select('rachaActual maximaRacha historialRachas');
         
         if (!usuario) {
             return res.status(404).json({ ok: false, msg: 'Usuario no encontrado' });
@@ -200,6 +217,7 @@ const getRachaActual = async (req, res = response) => {
         res.json({
             ok: true,
             rachaActual: usuario.rachaActual,
+            maximaRacha: usuario.maximaRacha,
             rachaRegistradaHoy
         });
 
@@ -255,6 +273,7 @@ const enviarSolicitudAmistad = async (req, res = response) => {
 
     try {
         const usuarioDestino = await Usuario.findOne({ codigoAmigo: codigoAmigo });
+        const yo = await Usuario.findById(idSolicitante);
 
         if (!usuarioDestino) {
             return res.status(404).json({
@@ -284,7 +303,11 @@ const enviarSolicitudAmistad = async (req, res = response) => {
             });
         }
 
-        usuarioDestino.solicitudesAmistad.push(idSolicitante);
+        usuarioDestino.solicitudesAmistad.push({
+            uid: yo._id,
+            nombre: yo.nombre,
+            codigoAmigo: yo.codigoAmigo
+        });
         await usuarioDestino.save();
 
         res.json({
@@ -316,7 +339,11 @@ const responderSolicitudAmistad = async (req, res = response) => {
             });
         }
 
-        if (!yo.solicitudesAmistad.includes(idSolicitante)) {
+        const tieneSolicitudPendiente = yo.solicitudesAmistad.some(
+            sol => sol.uid.toString() === idSolicitante
+        );
+
+        if (!tieneSolicitudPendiente) {
             return res.status(400).json({
                 ok: false,
                 msg: 'No tienes ninguna solicitud de amistad pendiente de este usuario'
@@ -325,12 +352,20 @@ const responderSolicitudAmistad = async (req, res = response) => {
 
         if (decision === 'ACEPTAR') {
 
-            yo.amigos.push(idSolicitante);
-            solicitante.amigos.push(miId);
+            yo.amigos.push({
+                uid: solicitante._id,
+                codigoAmigo: solicitante.codigoAmigo,
+                nombre: solicitante.nombre
+            });
+            
+            solicitante.amigos.push({
+                uid: yo._id,
+                codigoAmigo: yo.codigoAmigo,
+                nombre: yo.nombre
+            });
 
-            // Eliminamos la solicitud de mi lista de pendientes
             yo.solicitudesAmistad = yo.solicitudesAmistad.filter(
-                id => id.toString() !== idSolicitante
+                sol => sol.uid.toString() !== idSolicitante
             );
 
             // Guardamos los cambios en ambos documentos
@@ -346,7 +381,7 @@ const responderSolicitudAmistad = async (req, res = response) => {
             
             // Limpiamos la solicitud de mi lista de pendientes
             yo.solicitudesAmistad = yo.solicitudesAmistad.filter(
-                id => id.toString() !== idSolicitante
+                sol => sol.uid.toString() !== idSolicitante
             );
             
             await yo.save();
@@ -780,18 +815,23 @@ const deleteAmigo = async (req, res = response) => {
             });
         }
 
-        if (!yo.amigos.includes(idAmigo)) {
+        const amigoExiste = yo.amigos.some(
+            a => a.uid.toString() === idAmigo
+        );
+
+        if (!amigoExiste) {
             return res.status(400).json({
                 ok: false,
-                msg: 'Este usuario no se encuentra en tu lista de amigos'
+                msg: 'Este usuario no está en tu lista de amigos'
             });
         }
 
         yo.amigos = yo.amigos.filter(
-            id => id.toString() !== idAmigo
+            a => a.uid.toString() !== idAmigo
         );
+        
         amigo.amigos = amigo.amigos.filter(
-            id => id.toString() !== miId
+            a => a.uid.toString() !== miId
         );
 
         await yo.save();

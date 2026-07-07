@@ -76,10 +76,15 @@ const UsuarioSchema = Schema(
             default: ['Desayuno', 'Almuerzo', 'Comida', 'Merienda', 'Cena']
         },
         configuracion: {
-            tema: {
-                type: String,
-                default: 'CLARO'
+        type: Object, // Permite guardar un JSON anidado
+            default: {
+                tema: 'CLARO'
             }
+        },
+        codigoAmigo: {
+            type: String,
+            required: true,
+            unique: true
         },
         puntos: {
             type: Number,
@@ -114,18 +119,15 @@ const UsuarioSchema = Schema(
             type: Schema.Types.ObjectId,
             ref: 'Avatar'
         },
-        codigoAmigo: {
-            type: String,
-            required: true,
-            unique: true
-        },
         amigos: [{
-            type: Schema.Types.ObjectId, 
-            ref: 'Usuario'
+            uid: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+            codigoAmigo: { type: String },
+            nombre: { type: String }
         }],
         solicitudesAmistad: [{ 
-            type: Schema.Types.ObjectId, 
-            ref: 'Usuario' 
+            uid: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+            nombre: { type: String },
+            codigoAmigo: { type: String }
         }],
         misionesCompletadas: [{
             type: Schema.Types.ObjectId, 

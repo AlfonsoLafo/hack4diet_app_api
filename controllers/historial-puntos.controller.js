@@ -62,7 +62,7 @@ const crearEntradaHistorial = async (req, res = response) => {
         await nuevaEntrada.save();
 
         const nivelAnterior = usuario.nivel;
-        usuario.puntos = (usuario.puntos || 0) + Number(puntosGanados);
+        usuario.puntos = (usuario.puntos) + Number(puntosGanados);
         usuario.nivel = calcularNivel(usuario.puntos);
         const subioDeNivel = usuario.nivel > nivelAnterior;
         await usuario.save();

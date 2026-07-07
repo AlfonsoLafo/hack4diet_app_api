@@ -90,6 +90,14 @@ const renovarToken = async(req, res = response) => {
             plan: usuarioBD.plan,
             distribucionComidas: usuarioBD.distribucionComidas,
             configuracion: usuarioBD.configuracion,
+            codigoAmigo: usuarioBD.codigoAmigo,
+            puntos: usuarioBD.puntos,
+            insigniasDesbloqueadas: usuarioBD.insigniasDesbloqueadas,
+            insigniasDestacada: usuarioBD.insigniasDestacada,
+            avatar: usuarioBD.avatar,
+            amigos: usuarioBD.amigos,
+            solicitudesAmistad: usuarioBD.solicitudesAmistad,
+            recetasGuardadas: usuarioBD.recetasGuardadas,
             token: nuevoToken
         });
 
