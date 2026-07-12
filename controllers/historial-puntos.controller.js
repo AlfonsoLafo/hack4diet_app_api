@@ -67,6 +67,8 @@ const crearEntradaHistorial = async (req, res = response) => {
         const subioDeNivel = usuario.nivel > nivelAnterior;
         await usuario.save();
 
+        console.log(nuevaEntrada);
+
         res.status(201).json({
             ok: true,
             msg: 'Transacción de puntos registrada con éxito',

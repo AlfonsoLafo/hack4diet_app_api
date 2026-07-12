@@ -495,7 +495,7 @@ const actualizarRacha = async (req, res = response) => {
             usuario.maximaRacha = Math.max(usuario.rachaActual, usuario.maximaRacha || 0);
             
             await usuario.save();
-            return res.json({ ok: true, msg: 'Racha iniciada', rachaActual: usuario.rachaActual });
+            return res.json({ ok: true, msg: 'Racha iniciada', rachaActual: usuario.rachaActual, puntosGanados: 3 });
         }
 
         // else

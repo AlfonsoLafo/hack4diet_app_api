@@ -111,10 +111,10 @@ const UsuarioSchema = Schema(
             type: Schema.Types.ObjectId,
             ref: 'Insignia'
         }],
-        insigniasDestacada: {
+        insigniasDestacada: [{
             type: Schema.Types.ObjectId,
             ref: 'Insignia'
-        },
+        }],
         avatar: {
             type: Schema.Types.ObjectId,
             ref: 'Avatar'

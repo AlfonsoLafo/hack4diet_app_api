@@ -10,7 +10,7 @@ const InsigniaSchema = Schema(
             type: String,
             required: true
         },
-        url: {
+        class: {
             type: String,
             required: true
         },

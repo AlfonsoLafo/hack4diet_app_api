@@ -121,14 +121,6 @@ const actualizarEstadoMision = async (req, res = response) => {
             const puntosAGanar = mision.puntosOtorgados;
             const descripcionMision = mision.idMision.descripcion;
 
-            const nuevaTransaccionPuntos = new HistorialPuntos({
-                idUsuario: idUsuarioToken,
-                fecha: new Date(),
-                puntosGanados: puntosAGanar,
-                justificacion: `Misión Completada: ${descripcionMision}`
-            });
-            await nuevaTransaccionPuntos.save();
-
             const usuario = await Usuario.findById(idUsuarioToken);
             if (usuario) {
                 usuario.puntos = (usuario.puntos || 0) + puntosAGanar;
