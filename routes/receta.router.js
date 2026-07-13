@@ -11,7 +11,8 @@ const {
     eliminarReceta,
     getRecetasAmigo,
     guardarReceta,
-    desguardarReceta
+    desguardarReceta,
+    getRecetaById // <-- No olvides importarlo
 } = require('../controllers/receta.controller');
 
 const router = Router();
@@ -23,20 +24,25 @@ router.get('/amigo/:codigo', [
     validarCampos
 ], getRecetasAmigo);
 
-router.get('/:idUsuario', [
+router.get('/usuario/:idUsuario', [
     param('idUsuario', 'El ID del usuario debe ser un MongoID válido').isMongoId(),
     validarCampos
 ], getRecetasUsuario);
 
-router.get('/:idUsuario/guardadas', [
+router.get('/usuario/:idUsuario/guardadas', [
     param('idUsuario', 'El ID del usuario debe ser un MongoID válido').isMongoId(),
     validarCampos
 ], getRecetasGuardadas);
 
+router.get('/:id', [
+    param('id', 'El ID de la receta debe ser un MongoID válido').isMongoId(),
+    validarCampos
+], getRecetaById);
+
 router.post('/', [
     check('nombre', 'El nombre es obligatorio').not().isEmpty(),
     check('ingredientes', 'Los ingredientes deben ser un array de strings').isArray(),
-check('pasos', 'Los pasos deben ser un array de strings').isArray(),
+    check('pasos', 'Los pasos deben ser un array de strings').isArray(),
     check('dificultad', 'La dificultad es obligatoria y debe ser FACIL, MEDIA o DIFICIL').isIn(['FACIL', 'MEDIA', 'DIFICIL']),
     check('tiempoPreparacion', 'El tiempo de preparación es obligatorio y debe ser un número').isNumeric(),
     check('porciones', 'Las porciones son obligatorias y deben ser un número').isNumeric(),
@@ -72,7 +78,7 @@ router.post('/:id/guardar', [
     validarCampos
 ], guardarReceta);
 
-router.delete('/:id/guardar', [
+router.post('/:id/desguardar', [
     param('id', 'El ID de la receta debe ser un MongoID válido').isMongoId(),
     validarCampos
 ], desguardarReceta);

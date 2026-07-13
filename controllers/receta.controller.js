@@ -1,6 +1,33 @@
 const { response } = require('express');
 const Receta = require('../models/receta.model');
+const Usuario = require('../models/usuario.model');
 
+const getRecetaById = async (req, res = response) => {
+    const idReceta = req.params.id;
+
+    try {
+        const receta = await Receta.findById(idReceta);
+
+        if (!receta) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No se encontró ninguna receta con ese ID'
+            });
+        }
+
+        res.json({
+            ok: true,
+            receta
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al obtener la receta'
+        });
+    }
+};
 
 const getRecetasUsuario = async (req, res = response) => {
     const idUsuario = req.params.idUsuario;
@@ -26,6 +53,7 @@ const getRecetasGuardadas = async (req, res = response) => {
     const idUsuario = req.params.idUsuario;
 
     try {
+        console.log('ID del usuario para obtener recetas guardadas:', idUsuario);
         const usuario = await Usuario.findById(idUsuario);
 
         if (!usuario) {
@@ -161,7 +189,7 @@ const eliminarReceta = async (req, res = response) => {
 };
 
 const getRecetasAmigo = async (req, res = response) => {
-    const codigoAmigoInput = req.params.codigo.toUpperCase().trim();
+    const codigoAmigoInput = req.params.codigo;
     const miId = req.uidToken; // El usuario logueado que quiere ver las recetas
 
     try {
@@ -173,14 +201,17 @@ const getRecetasAmigo = async (req, res = response) => {
                 msg: 'No se encontró ningún usuario con ese código de amigo'
             });
         }
+        
+        const somosAmigos = amigo.amigos && amigo.amigos.some(a => 
+            a.uid && a.uid.toString() === miId.toString()
+        );
 
-        if (!amigo.amigos.includes(miId)) {
+        if (!somosAmigos) {
             return res.status(403).json({
                 ok: false,
                 msg: 'No sois amigos'
             });
         }
-
         const recetasAmigo = await Receta.find({
             idPropietario: amigo._id,
             publico: true
@@ -285,6 +316,7 @@ const desguardarReceta = async (req, res = response) => {
 };
 
 module.exports = {
+    getRecetaById,
     getRecetasUsuario,
     getRecetasGuardadas,
     crearReceta,
