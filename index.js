@@ -44,6 +44,6 @@ app.use('/api/misiones',                require('./routes/mision.router'));
 
 app.use('/api/open-food-facts',         require('./external-services/open-food-facts.service'));
 
-app.listen(process.env.PORT, ()=>{
+app.listen(process.env.PORT, '0.0.0.0', ()=>{
   console.log('Servidor en puerto: ' + process.env.PORT);
 });

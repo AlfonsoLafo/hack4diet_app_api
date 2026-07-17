@@ -206,12 +206,7 @@ const getRecetasAmigo = async (req, res = response) => {
             a.uid && a.uid.toString() === miId.toString()
         );
 
-        if (!somosAmigos) {
-            return res.status(403).json({
-                ok: false,
-                msg: 'No sois amigos'
-            });
-        }
+        
         const recetasAmigo = await Receta.find({
             idPropietario: amigo._id,
             publico: true
